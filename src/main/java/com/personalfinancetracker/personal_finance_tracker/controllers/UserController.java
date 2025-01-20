@@ -43,13 +43,8 @@ public class UserController {
     @PostMapping(path= "/v1/users")
     public ResponseEntity<Object> createUser(@Valid @RequestBody UserDto userDto) {
 
-        if (userService.isExists(userDto.getEmail())) {
-            ErrorResponse errorResponse = ErrorResponse
-                                            .builder()
-                                            .message("EMAIL ALREADY EXIST")
-                                            .build();
-            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
-        }
+        ResponseEntity<Object> errorResponse = emailExistsException(userDto);
+        if (errorResponse != null) return errorResponse;
         try {
             UserEntity userEntity = userMapper.mapFrom(userDto);
             UserEntity savedUser = userService.create(userEntity);
@@ -62,13 +57,10 @@ public class UserController {
 
     @PutMapping("/v1/users/{id}")
     public ResponseEntity<Object> fullUpdateAuthor(@PathVariable("id") Long id, @Valid @RequestBody UserDto userDto) {
-        if (!userService.isExists(id)) {
-            ErrorResponse errorResponse = ErrorResponse
-                    .builder()
-                    .message("User Does Not Exists")
-                    .build();
-            return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
-        }
+        ResponseEntity<Object> errorResponse1 = userDoesNotExistsException(id);
+        if (errorResponse1 != null) return errorResponse1;
+        ResponseEntity<Object> errorResponse = emailExistsException(userDto);
+        if (errorResponse != null) return errorResponse;
         userDto.setId(id);
         try {
             UserEntity userEntity = userMapper.mapFrom(userDto);
@@ -82,13 +74,10 @@ public class UserController {
 
     @PatchMapping(path = "/v1/users/{id}")
     public ResponseEntity<Object> partialUpdate(@PathVariable("id") Long id, @Valid @RequestBody UserDto userDto) {
-        if (!userService.isExists(id)) {
-            ErrorResponse errorResponse = ErrorResponse
-                    .builder()
-                    .message("User Does Not Exists")
-                    .build();
-            return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
-        }
+        ResponseEntity<Object> errorResponse1 = userDoesNotExistsException(id);
+        if (errorResponse1 != null) return errorResponse1;
+        ResponseEntity<Object> errorResponse = emailExistsException(userDto);
+        if (errorResponse != null) return errorResponse;
         userDto.setId(id);
         try {
             UserEntity userEntity = userMapper.mapFrom(userDto);
@@ -107,5 +96,27 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    private ResponseEntity<Object> emailExistsException(UserDto userDto) {
+        if (userService.isExists(userDto.getEmail())) {
+            ErrorResponse errorResponse = ErrorResponse
+                    .builder()
+                    .message("EMAIL ALREADY EXIST")
+                    .build();
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        }
+        return null;
+    }
+
+    private ResponseEntity<Object> userDoesNotExistsException(Long id) {
+        if (!userService.isExists(id)) {
+            ErrorResponse errorResponse = ErrorResponse
+                    .builder()
+                    .message("User Does Not Exists")
+                    .build();
+            return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+        }
+        return null;
     }
 }
