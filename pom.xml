@@ -104,6 +104,7 @@
 				</configuration>
 			</plugin>
 		</plugins>
+		<finalName>personal-finance-tracker-api</finalName>
 	</build>
 
 </project>
