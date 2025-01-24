@@ -1,4 +1,4 @@
-package com.personalfinancetracker.personal_finance_tracker.exceptions;
+package com.personalfinancetracker.exceptions;
 
 import lombok.Builder;
 import lombok.Data;

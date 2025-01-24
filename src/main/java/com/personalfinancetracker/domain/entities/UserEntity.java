@@ -1,4 +1,4 @@
-package com.personalfinancetracker.personal_finance_tracker.domain.entities;
+package com.personalfinancetracker.domain.entities;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -6,7 +6,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -28,6 +30,10 @@ public class UserEntity {
 
     @Column(nullable = false)
     private String password;
+
+    @Column(nullable = true)
+    @OneToMany(mappedBy = "userEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BankAccountEntity> bankAccounts = new ArrayList<>();
 
     @Column(nullable = false)
     @Temporal(TemporalType.TIMESTAMP)

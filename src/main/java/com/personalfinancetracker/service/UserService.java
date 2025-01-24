@@ -1,6 +1,6 @@
-package com.personalfinancetracker.personal_finance_tracker.service;
+package com.personalfinancetracker.service;
 
-import com.personalfinancetracker.personal_finance_tracker.domain.entities.UserEntity;
+import com.personalfinancetracker.domain.entities.UserEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;

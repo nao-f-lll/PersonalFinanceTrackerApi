@@ -1,8 +1,8 @@
-package com.personalfinancetracker.personal_finance_tracker.mapper.impl;
+package com.personalfinancetracker.mapper.impl;
 
-import com.personalfinancetracker.personal_finance_tracker.domain.dto.UserDto;
-import com.personalfinancetracker.personal_finance_tracker.domain.entities.UserEntity;
-import com.personalfinancetracker.personal_finance_tracker.mapper.Mapper;
+import com.personalfinancetracker.domain.dto.UserDto;
+import com.personalfinancetracker.domain.entities.UserEntity;
+import com.personalfinancetracker.mapper.Mapper;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 

@@ -1,7 +1,6 @@
-package com.personalfinancetracker.personal_finance_tracker.repositories;
+package com.personalfinancetracker.repositories;
 
-import com.personalfinancetracker.personal_finance_tracker.domain.entities.UserEntity;
-import org.springframework.data.jpa.repository.Query;
+import com.personalfinancetracker.domain.entities.UserEntity;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,8 +1,8 @@
-package com.personalfinancetracker.personal_finance_tracker.service.impl;
+package com.personalfinancetracker.service.impl;
 
-import com.personalfinancetracker.personal_finance_tracker.domain.entities.UserEntity;
-import com.personalfinancetracker.personal_finance_tracker.repositories.UserRepository;
-import com.personalfinancetracker.personal_finance_tracker.service.UserService;
+import com.personalfinancetracker.domain.entities.UserEntity;
+import com.personalfinancetracker.repositories.UserRepository;
+import com.personalfinancetracker.service.UserService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -13,7 +13,6 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-
     private final PasswordEncoder passwordEncoder;
 
     public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {

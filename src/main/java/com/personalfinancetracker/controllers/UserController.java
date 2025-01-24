@@ -1,10 +1,10 @@
-package com.personalfinancetracker.personal_finance_tracker.controllers;
+package com.personalfinancetracker.controllers;
 
-import com.personalfinancetracker.personal_finance_tracker.domain.dto.UserDto;
-import com.personalfinancetracker.personal_finance_tracker.domain.entities.UserEntity;
-import com.personalfinancetracker.personal_finance_tracker.exceptions.ErrorResponse;
-import com.personalfinancetracker.personal_finance_tracker.mapper.Mapper;
-import com.personalfinancetracker.personal_finance_tracker.service.UserService;
+import com.personalfinancetracker.domain.dto.UserDto;
+import com.personalfinancetracker.domain.entities.UserEntity;
+import com.personalfinancetracker.exceptions.ErrorResponse;
+import com.personalfinancetracker.mapper.Mapper;
+import com.personalfinancetracker.service.UserService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +42,6 @@ public class UserController {
 
     @PostMapping(path= "/v1/users")
     public ResponseEntity<Object> createUser(@Valid @RequestBody UserDto userDto) {
-
         ResponseEntity<Object> errorResponse = emailExistsException(userDto);
         if (errorResponse != null) return errorResponse;
         try {

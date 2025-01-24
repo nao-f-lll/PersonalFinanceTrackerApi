@@ -1,4 +1,4 @@
-package com.personalfinancetracker.personal_finance_tracker.mapper;
+package com.personalfinancetracker.mapper;
 
 public interface Mapper<A,B> {
 

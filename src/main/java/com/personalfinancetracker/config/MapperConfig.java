@@ -1,4 +1,4 @@
-package com.personalfinancetracker.personal_finance_tracker.config;
+package com.personalfinancetracker.config;
 
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
