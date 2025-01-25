@@ -35,6 +35,7 @@ public class UserController {
             userEntity.setId(null);
             userEntity.setPassword(null);
             userEntity.setCreation_date(null);
+            userEntity.setUpdate_date(null);
             UserDto response = userMapper.mapTo(userEntity);
             return new ResponseEntity<>(response, HttpStatus.OK);
         }).orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
@@ -89,7 +90,7 @@ public class UserController {
     }
 
     @DeleteMapping(path = "/v1/users/{id}")
-    public ResponseEntity deleteAuthor(@PathVariable("id") Long id) {
+    public ResponseEntity<Object> deleteAuthor(@PathVariable("id") Long id) {
         if (userService.isExists(id)) {
             userService.delete(id);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);

@@ -1,0 +1,34 @@
+services:
+  app:
+    image: naooff/personal-finance-tracker-api:latest
+    container_name: personal-finance-tracker-api-container
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_APPLICATION_NAME: jpa
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_MVC_CONVERTERS_PREFERRED_JSON_MAPPER: jackson
+      SPRING_MVC_CONTENTNEGOTIATION_FAVOR_PARAMETER: false
+      SPRING_MVC_CONTENTNEGOTIATION_MEDIA_TYPES_JSON: application/json
+    depends_on:
+      - db
+
+  db:
+    image: postgres:17
+    container_name: postgres-db
+    environment:
+      POSTGRES_DB: personal_finance_app_db
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+volumes:
+  postgres-data:
+    driver: local
