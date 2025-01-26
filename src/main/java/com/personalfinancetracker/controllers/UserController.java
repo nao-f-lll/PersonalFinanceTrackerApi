@@ -1,16 +1,19 @@
 package com.personalfinancetracker.controllers;
 
 import com.personalfinancetracker.domain.dto.UserDto;
+import com.personalfinancetracker.domain.dto.validation.CreateGroup;
+import com.personalfinancetracker.domain.dto.validation.FullUpdateGroup;
+import com.personalfinancetracker.domain.dto.validation.PartialUpdateGroup;
 import com.personalfinancetracker.domain.entities.UserEntity;
 import com.personalfinancetracker.exceptions.ErrorResponse;
 import com.personalfinancetracker.mapper.Mapper;
 import com.personalfinancetracker.service.UserService;
-import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
@@ -42,7 +45,7 @@ public class UserController {
     }
 
     @PostMapping(path= "/v1/users")
-    public ResponseEntity<Object> createUser(@Valid @RequestBody UserDto userDto) {
+    public ResponseEntity<Object> createUser(@Validated(CreateGroup.class) @RequestBody UserDto userDto) {
         ResponseEntity<Object> errorResponse = emailExistsException(userDto);
         if (errorResponse != null) return errorResponse;
         try {
@@ -56,7 +59,7 @@ public class UserController {
     }
 
     @PutMapping("/v1/users/{id}")
-    public ResponseEntity<Object> fullUpdateAuthor(@PathVariable("id") Long id, @Valid @RequestBody UserDto userDto) {
+    public ResponseEntity<Object> fullUpdateAuthor(@PathVariable("id") Long id, @Validated(FullUpdateGroup.class) @RequestBody UserDto userDto) {
         ResponseEntity<Object> errorResponse1 = userDoesNotExistsException(id);
         if (errorResponse1 != null) return errorResponse1;
         ResponseEntity<Object> errorResponse = emailExistsException(userDto);
@@ -66,14 +69,14 @@ public class UserController {
             UserEntity userEntity = userMapper.mapFrom(userDto);
             UserEntity savedUser = userService.fullUpdate(userEntity);
             UserDto response = userMapper.mapTo(savedUser);
-            return new ResponseEntity<>(response, HttpStatus.CREATED);
+            return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 
     @PatchMapping(path = "/v1/users/{id}")
-    public ResponseEntity<Object> partialUpdate(@PathVariable("id") Long id, @Valid @RequestBody UserDto userDto) {
+    public ResponseEntity<Object> partialUpdate(@PathVariable("id") Long id, @Validated(PartialUpdateGroup.class) @RequestBody UserDto userDto) {
         ResponseEntity<Object> errorResponse1 = userDoesNotExistsException(id);
         if (errorResponse1 != null) return errorResponse1;
         ResponseEntity<Object> errorResponse = emailExistsException(userDto);
@@ -83,7 +86,7 @@ public class UserController {
             UserEntity userEntity = userMapper.mapFrom(userDto);
             UserEntity savedUser = userService.partialUpdate(userEntity);
             UserDto response = userMapper.mapTo(savedUser);
-            return new ResponseEntity<>(response, HttpStatus.CREATED);
+            return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }

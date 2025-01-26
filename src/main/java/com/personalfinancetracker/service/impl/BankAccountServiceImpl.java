@@ -22,7 +22,6 @@ public class BankAccountServiceImpl implements BankAccountService {
     private final Mapper<BankAccountEntity, BankAccountDto> bankAccountMapper;
 
 
-
     public BankAccountServiceImpl(BankAccountRepository bankAccountRepository, UserService userService, Mapper<UserEntity, UserDto> userMapper, Mapper<BankAccountEntity, BankAccountDto> bankAccountMapper) {
         this.bankAccountRepository = bankAccountRepository;
         this.userService = userService;
@@ -56,7 +55,7 @@ public class BankAccountServiceImpl implements BankAccountService {
         return bankAccountRepository.findById(bankAccountEntity.getId()).map(existingAccount -> {
             Optional.ofNullable(bankAccountEntity.getName()).ifPresent(existingAccount::setName);
             Optional.ofNullable(bankAccountEntity.getBalance()).ifPresent(existingAccount::setBalance);
-            existingAccount.setType(bankAccountEntity.getType());
+            Optional.ofNullable(bankAccountEntity.getType()).ifPresent(existingAccount::setType);
             return bankAccountRepository.save(existingAccount);
         }).orElseThrow(() -> new RuntimeException("Bank Account Does Not Exist"));
     }
@@ -69,8 +68,21 @@ public class BankAccountServiceImpl implements BankAccountService {
             UserDto userDto = userMapper.mapTo(foundUser.get());
             BankAccountDto retrievedBankAccountDto = bankAccountMapper.mapTo(foundAccount.get());
             bankAccountDto.setUserDto(userDto);
-            bankAccountDto.setType(retrievedBankAccountDto.getType());
+            if (bankAccountDto.getType() == null)
+            {
+                bankAccountDto.setType(retrievedBankAccountDto.getType());
+            }
+            if (bankAccountDto.getBalance() == null)
+            {
+                bankAccountDto.setBalance(retrievedBankAccountDto.getBalance());
+            }
             bankAccountDto.setId(retrievedBankAccountDto.getId());
         }
     }
+
+    @Override
+    public void delete(Long bankAccountId) {
+        bankAccountRepository.deleteById(bankAccountId);
+    }
 }
+

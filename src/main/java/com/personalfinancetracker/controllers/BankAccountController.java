@@ -1,11 +1,13 @@
 package com.personalfinancetracker.controllers;
 
 import com.personalfinancetracker.domain.dto.BankAccountDto;
+import com.personalfinancetracker.domain.dto.validation.CreateGroup;
+import com.personalfinancetracker.domain.dto.validation.FullUpdateGroup;
+import com.personalfinancetracker.domain.dto.validation.PartialUpdateGroup;
 import com.personalfinancetracker.domain.entities.BankAccountEntity;
 import com.personalfinancetracker.exceptions.ErrorResponse;
 import com.personalfinancetracker.mapper.Mapper;
 import com.personalfinancetracker.service.BankAccountService;
-import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,9 +15,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Optional;
 
 @RestController
 public class BankAccountController {
@@ -38,7 +39,7 @@ public class BankAccountController {
     }
 
     @PostMapping(path = "/v1/bank-accounts")
-    public ResponseEntity<Object> createBankAccount(@Valid @RequestBody BankAccountDto bankAccountDto) {
+    public ResponseEntity<Object> createBankAccount(@Validated(CreateGroup.class) @RequestBody BankAccountDto bankAccountDto) {
         try {
             BankAccountEntity bankAccountEntity = bankAccountMapper.mapFrom(bankAccountDto);
             BankAccountEntity saveBankAccount = bankAccountService.create(bankAccountEntity);
@@ -54,7 +55,7 @@ public class BankAccountController {
     }
 
     @PatchMapping(path = "/v1/bank-accounts/{user-id}/{bank-account-id}")
-    public ResponseEntity<Object> partialUpdate(@RequestBody BankAccountDto bankAccountDto,
+    public ResponseEntity<Object> partialUpdate(@Validated(PartialUpdateGroup.class) @RequestBody BankAccountDto bankAccountDto,
                                                 @PathVariable("user-id") Long userId, @PathVariable("bank-account-id") Long bankAccountId) {
         ResponseEntity<Object> errorResponse = bankAccountDoesNotExistsException(userId, bankAccountId);
         if (errorResponse != null) return errorResponse;
@@ -67,6 +68,15 @@ public class BankAccountController {
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
+    }
+    @DeleteMapping(path ="/v1/bank-accounts/{user-id}/{bank-account-id}")
+    public ResponseEntity<Object> deleteBankAccounts(@PathVariable("user-id") Long userId,
+                                                     @PathVariable("bank-account-id") Long bankAccountId) {
+        if (bankAccountDoesNotExistsException(userId, bankAccountId) == null) {
+            bankAccountService.delete(bankAccountId);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     private ResponseEntity<Object> bankAccountDoesNotExistsException(Long userId, Long bankAccountId) {
