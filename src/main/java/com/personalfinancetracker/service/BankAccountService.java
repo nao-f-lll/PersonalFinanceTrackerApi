@@ -17,4 +17,6 @@ public interface BankAccountService {
     BankAccountEntity partialUpdate(BankAccountEntity bankAccountEntity);
 
     void fillBankAccountDtoWithUserAndDetails(BankAccountDto bankAccountDto, Long userId, Long bankAccountId);
+
+    void delete(Long bankAccountId);
 }
