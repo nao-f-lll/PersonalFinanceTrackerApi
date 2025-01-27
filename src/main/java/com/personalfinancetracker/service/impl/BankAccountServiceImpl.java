@@ -8,9 +8,13 @@ import com.personalfinancetracker.mapper.Mapper;
 import com.personalfinancetracker.repositories.BankAccountRepository;
 import com.personalfinancetracker.service.BankAccountService;
 import com.personalfinancetracker.service.UserService;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
+
+import java.util.ArrayList;
 import java.util.Optional;
 
 @Service
@@ -20,6 +24,7 @@ public class BankAccountServiceImpl implements BankAccountService {
     private final UserService userService;
     private final Mapper<UserEntity, UserDto> userMapper;
     private final Mapper<BankAccountEntity, BankAccountDto> bankAccountMapper;
+    private final String CACHE_TABLE_NAME = "userBankAccounts";
 
 
     public BankAccountServiceImpl(BankAccountRepository bankAccountRepository, UserService userService, Mapper<UserEntity, UserDto> userMapper, Mapper<BankAccountEntity, BankAccountDto> bankAccountMapper) {
@@ -29,6 +34,7 @@ public class BankAccountServiceImpl implements BankAccountService {
         this.bankAccountMapper = bankAccountMapper;
     }
 
+    @CacheEvict(value = CACHE_TABLE_NAME, allEntries = true)
     @Override
     public BankAccountEntity create(BankAccountEntity bankAccountEntity) {
         Optional<UserEntity> userEntity = userService.findOne(bankAccountEntity.getUserEntity().getId());
@@ -40,9 +46,15 @@ public class BankAccountServiceImpl implements BankAccountService {
         }
     }
 
+    @Cacheable(value = CACHE_TABLE_NAME, key = "#userId")
     @Override
     public Page<BankAccountEntity> findAllByUserId(Pageable pageable, Long userId) {
-        return bankAccountRepository.findAllByUserId(pageable, userId);
+        return  bankAccountRepository.findAllByUserId(pageable, userId);
+    }
+
+    @Override
+    public ArrayList<BankAccountEntity> findAllByUserId(Long userId) {
+        return bankAccountRepository.findAllByUserId(userId);
     }
 
     @Override
@@ -50,6 +62,7 @@ public class BankAccountServiceImpl implements BankAccountService {
         return bankAccountRepository.existsById(userId, bankAccountId);
     }
 
+    @CacheEvict(value = CACHE_TABLE_NAME, allEntries = true)
     @Override
     public BankAccountEntity partialUpdate(BankAccountEntity bankAccountEntity) {
         return bankAccountRepository.findById(bankAccountEntity.getId()).map(existingAccount -> {
