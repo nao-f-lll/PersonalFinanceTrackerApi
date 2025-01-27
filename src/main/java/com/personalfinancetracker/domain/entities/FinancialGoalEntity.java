@@ -1,21 +1,19 @@
 package com.personalfinancetracker.domain.entities;
 
-import com.personalfinancetracker.enums.AccountBankType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.io.Serializable;
+import java.sql.Date;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "bank_accounts")
-public class BankAccountEntity implements Serializable {
+@Table(name = "financial_goal")
+public class FinancialGoalEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,11 +24,14 @@ public class BankAccountEntity implements Serializable {
     private UserEntity userEntity;
 
     @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private AccountBankType type;
+    private String name;
 
     @Column(nullable = false)
-    private Double balance;
+    private Double targetAmount;
 
-    private String name;
+    @Column(nullable = false)
+    private Double currentAmount;
+
+    @Column(nullable = false)
+    private Date expectedDate;
 }

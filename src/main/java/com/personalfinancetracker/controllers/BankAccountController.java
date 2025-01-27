@@ -2,7 +2,6 @@ package com.personalfinancetracker.controllers;
 
 import com.personalfinancetracker.domain.dto.BankAccountDto;
 import com.personalfinancetracker.domain.dto.validation.CreateGroup;
-import com.personalfinancetracker.domain.dto.validation.FullUpdateGroup;
 import com.personalfinancetracker.domain.dto.validation.PartialUpdateGroup;
 import com.personalfinancetracker.domain.entities.BankAccountEntity;
 import com.personalfinancetracker.exceptions.ErrorResponse;
