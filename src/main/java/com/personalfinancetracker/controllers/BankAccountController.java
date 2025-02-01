@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import java.util.Optional;
 
 @RestController
 public class BankAccountController {
@@ -53,12 +54,12 @@ public class BankAccountController {
         }
     }
 
-    @PatchMapping(path = "/v1/bank-accounts/{user-id}/{bank-account-id}")
+    @PatchMapping(path = "/v1/bank-accounts/{bank-account-id}")
     public ResponseEntity<Object> partialUpdate(@Validated(PartialUpdateGroup.class) @RequestBody BankAccountDto bankAccountDto,
-                                                @PathVariable("user-id") Long userId, @PathVariable("bank-account-id") Long bankAccountId) {
-        ResponseEntity<Object> errorResponse = bankAccountDoesNotExistsException(userId, bankAccountId);
+                                                @PathVariable("bank-account-id") Long bankAccountId) {
+        ResponseEntity<Object> errorResponse = doesBankAccountExists(bankAccountId);
         if (errorResponse != null) return errorResponse;
-        bankAccountService.fillBankAccountDtoWithUserAndDetails(bankAccountDto, userId, bankAccountId);
+        bankAccountService.fillBankAccountDtoWithDetails(bankAccountDto, bankAccountId);
         try {
             BankAccountEntity bankAccountEntity = bankAccountMapper.mapFrom(bankAccountDto);
             BankAccountEntity saveBankAccount = bankAccountService.partialUpdate(bankAccountEntity);
@@ -68,18 +69,21 @@ public class BankAccountController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
-    @DeleteMapping(path ="/v1/bank-accounts/{user-id}/{bank-account-id}")
-    public ResponseEntity<Object> deleteBankAccounts(@PathVariable("user-id") Long userId,
-                                                     @PathVariable("bank-account-id") Long bankAccountId) {
-        if (bankAccountDoesNotExistsException(userId, bankAccountId) == null) {
-            bankAccountService.delete(bankAccountId);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+
+    @DeleteMapping(path ="/v1/bank-accounts/{bank-account-id}")
+    public ResponseEntity<Object> deleteBankAccounts(@PathVariable("bank-account-id") Long bankAccountId) {
+        if (doesBankAccountExists(bankAccountId) == null) {
+            Optional<BankAccountEntity> bankAccountEntity = bankAccountService.findOne(bankAccountId);
+            if (bankAccountEntity.isPresent()) {
+                bankAccountService.delete(bankAccountId, bankAccountEntity.get().getUserEntity().getId());
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    private ResponseEntity<Object> bankAccountDoesNotExistsException(Long userId, Long bankAccountId) {
-        if (!bankAccountService.isExists(userId, bankAccountId)) {
+    private ResponseEntity<Object> doesBankAccountExists(Long bankAccountId) {
+        if (!bankAccountService.isExists(bankAccountId)) {
             ErrorResponse errorResponse = ErrorResponse
                     .builder()
                     .message("Bank Account Does Not Exists")

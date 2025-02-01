@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.io.Serializable;
 import java.sql.Date;
 
 @Data
@@ -13,7 +14,7 @@ import java.sql.Date;
 @Builder
 @Entity
 @Table(name = "financial_goal")
-public class FinancialGoalEntity {
+public class FinancialGoalEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
