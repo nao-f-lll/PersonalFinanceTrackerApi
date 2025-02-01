@@ -4,12 +4,14 @@ import com.personalfinancetracker.domain.dto.BankAccountDto;
 import com.personalfinancetracker.domain.dto.UserDto;
 import com.personalfinancetracker.domain.entities.BankAccountEntity;
 import com.personalfinancetracker.domain.entities.UserEntity;
+import com.personalfinancetracker.event.BankAccountCreateUpdatedEvent;
 import com.personalfinancetracker.mapper.Mapper;
 import com.personalfinancetracker.repositories.BankAccountRepository;
 import com.personalfinancetracker.service.BankAccountService;
 import com.personalfinancetracker.service.UserService;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
@@ -25,13 +27,15 @@ public class BankAccountServiceImpl implements BankAccountService {
     private final Mapper<UserEntity, UserDto> userMapper;
     private final Mapper<BankAccountEntity, BankAccountDto> bankAccountMapper;
     private final String CACHE_TABLE_NAME = "userBankAccounts";
+    private final ApplicationEventPublisher eventPublisher;
 
 
-    public BankAccountServiceImpl(BankAccountRepository bankAccountRepository, UserService userService, Mapper<UserEntity, UserDto> userMapper, Mapper<BankAccountEntity, BankAccountDto> bankAccountMapper) {
+    public BankAccountServiceImpl(BankAccountRepository bankAccountRepository, UserService userService, Mapper<UserEntity, UserDto> userMapper, Mapper<BankAccountEntity, BankAccountDto> bankAccountMapper, ApplicationEventPublisher eventPublisher) {
         this.bankAccountRepository = bankAccountRepository;
         this.userService = userService;
         this.userMapper = userMapper;
         this.bankAccountMapper = bankAccountMapper;
+        this.eventPublisher = eventPublisher;
     }
 
     @CacheEvict(value = CACHE_TABLE_NAME, allEntries = true)
@@ -40,7 +44,10 @@ public class BankAccountServiceImpl implements BankAccountService {
         Optional<UserEntity> userEntity = userService.findOne(bankAccountEntity.getUserEntity().getId());
         if (userEntity.isPresent()) {
             bankAccountEntity.setUserEntity(userEntity.get());
-            return bankAccountRepository.save(bankAccountEntity);
+            BankAccountEntity saveBAnkAccount = bankAccountRepository.save(bankAccountEntity);
+            BankAccountCreateUpdatedEvent event = new BankAccountCreateUpdatedEvent(this, bankAccountEntity.getUserEntity().getId());
+            eventPublisher.publishEvent(event);
+            return saveBAnkAccount;
         }  else {
             return null;
         }
@@ -58,8 +65,8 @@ public class BankAccountServiceImpl implements BankAccountService {
     }
 
     @Override
-    public boolean isExists(Long userId, Long bankAccountId) {
-        return bankAccountRepository.existsById(userId, bankAccountId);
+    public boolean isExists(Long bankAccountId) {
+        return bankAccountRepository.existsById(bankAccountId);
     }
 
     @CacheEvict(value = CACHE_TABLE_NAME, allEntries = true)
@@ -69,13 +76,17 @@ public class BankAccountServiceImpl implements BankAccountService {
             Optional.ofNullable(bankAccountEntity.getName()).ifPresent(existingAccount::setName);
             Optional.ofNullable(bankAccountEntity.getBalance()).ifPresent(existingAccount::setBalance);
             Optional.ofNullable(bankAccountEntity.getType()).ifPresent(existingAccount::setType);
-            return bankAccountRepository.save(existingAccount);
+            BankAccountEntity saveBAnkAccount = bankAccountRepository.save(existingAccount);
+            BankAccountCreateUpdatedEvent event = new BankAccountCreateUpdatedEvent(this, bankAccountEntity.getUserEntity().getId());
+            eventPublisher.publishEvent(event);
+            return saveBAnkAccount;
         }).orElseThrow(() -> new RuntimeException("Bank Account Does Not Exist"));
     }
 
-    public void fillBankAccountDtoWithUserAndDetails(BankAccountDto bankAccountDto, Long userId, Long bankAccountId) {
-        Optional<UserEntity> foundUser = userService.findOne(userId);
+    public void fillBankAccountDtoWithDetails(BankAccountDto bankAccountDto, Long bankAccountId) {
         Optional<BankAccountEntity> foundAccount = bankAccountRepository.findById(bankAccountId);
+        Long userId = bankAccountRepository.findUserId(bankAccountId);
+        Optional<UserEntity> foundUser = userService.findOne(userId);
 
         if (foundUser.isPresent() && foundAccount.isPresent()) {
             UserDto userDto = userMapper.mapTo(foundUser.get());
@@ -94,8 +105,15 @@ public class BankAccountServiceImpl implements BankAccountService {
     }
 
     @Override
-    public void delete(Long bankAccountId) {
+    public void delete(Long bankAccountId, Long userId) {
         bankAccountRepository.deleteById(bankAccountId);
+        BankAccountCreateUpdatedEvent event = new BankAccountCreateUpdatedEvent(this, userId);
+        eventPublisher.publishEvent(event);
+    }
+
+    @Override
+    public Optional<BankAccountEntity> findOne(Long bankAccountId) {
+        return bankAccountRepository.findById(bankAccountId);
     }
 }
 

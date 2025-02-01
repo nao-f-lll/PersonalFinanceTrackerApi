@@ -1,24 +1,21 @@
 package com.personalfinancetracker.controllers;
 
-import com.personalfinancetracker.domain.dto.BankAccountDto;
 import com.personalfinancetracker.domain.dto.FinancialGoalDto;
-import com.personalfinancetracker.domain.dto.UserDto;
 import com.personalfinancetracker.domain.dto.validation.CreateGroup;
-import com.personalfinancetracker.domain.entities.BankAccountEntity;
+import com.personalfinancetracker.domain.dto.validation.PartialUpdateGroup;
 import com.personalfinancetracker.domain.entities.FinancialGoalEntity;
-import com.personalfinancetracker.domain.entities.UserEntity;
+import com.personalfinancetracker.exceptions.ErrorResponse;
 import com.personalfinancetracker.mapper.Mapper;
 import com.personalfinancetracker.service.FinancialGoalService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.Marker;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class FinancialGoalController {
@@ -34,12 +31,16 @@ public class FinancialGoalController {
     }
 
 
+    @GetMapping(path = "/v1/financial-goals/{user-id}")
+    public Page<Object> getFinancialGoals(Pageable pageable, @PathVariable("user-id") Long userId) {
+        Page<FinancialGoalEntity> financialGoalEntities = financialGoalService.findAllByUserId(pageable, userId);
+        return financialGoalEntities.map(financialGoalMapper::mapTo);
+    }
 
-    @PostMapping(path = "/v1/financial-goal")
+    @PostMapping(path = "/v1/financial-goals")
     public ResponseEntity<Object> creatFinancialGoal(@Validated(CreateGroup.class) @RequestBody FinancialGoalDto financialGoalDto) {
         try {
             FinancialGoalEntity financialGoalEntity = financialGoalMapper.mapFrom(financialGoalDto);
-            logger.info("MAP FROM DTO TO ENTITY IS WILL");
             FinancialGoalEntity savedFinancialGoal = financialGoalService.create(financialGoalEntity);
             if (savedFinancialGoal != null) {
                 FinancialGoalDto response = financialGoalMapper.mapTo(savedFinancialGoal);
@@ -48,10 +49,44 @@ public class FinancialGoalController {
                 return new ResponseEntity<>("The user does not exists",HttpStatus.NOT_FOUND);
             }
         } catch (Exception e) {
-            logger.error("ERROR", e);
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
+
+    @PatchMapping(path = "/v1/financial-goals/{financial-goal-id}")
+    public ResponseEntity<Object> partialUpdate(@PathVariable("financial-goal-id") Long financialGoalId,
+                                                @Validated(PartialUpdateGroup.class) @RequestBody FinancialGoalDto financialGoalDto) {
+        ResponseEntity<Object> errorResponse = doesFinancialGoalExists(financialGoalId);
+        if (errorResponse != null) return errorResponse;
+        financialGoalService.fillFinancialGoalDtoWithDetails(financialGoalDto, financialGoalId);
+        try {
+            FinancialGoalEntity financialGoalEntity = financialGoalMapper.mapFrom(financialGoalDto);
+            FinancialGoalEntity saveFinancialGoal = financialGoalService.partialUpdate(financialGoalEntity);
+            FinancialGoalDto response = financialGoalMapper.mapTo(saveFinancialGoal);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+
+    @DeleteMapping(path = "/v1/financial-goals/{financial-goal-id}")
+    public ResponseEntity<Object> deleteFinancialGoal(@PathVariable("financial-goal-id") Long financialGoalId) {
+        ResponseEntity<Object> errorResponse = doesFinancialGoalExists(financialGoalId);
+        if (errorResponse != null) return errorResponse;
+        financialGoalService.delete(financialGoalId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+
+    private ResponseEntity<Object> doesFinancialGoalExists(Long financialGoalId) {
+        if (!financialGoalService.isExists(financialGoalId)) {
+            ErrorResponse errorResponse = ErrorResponse
+                    .builder()
+                    .message("Financial Goal Does Not Exists")
+                    .build();
+            return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+        }
+        return null;
+    }
 }
-
-

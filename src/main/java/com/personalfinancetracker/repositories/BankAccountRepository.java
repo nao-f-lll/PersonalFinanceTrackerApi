@@ -21,6 +21,7 @@ public interface BankAccountRepository extends CrudRepository<BankAccountEntity,
     @Query("SELECT a FROM BankAccountEntity a WHERE a.userEntity.id = :userId")
     ArrayList<BankAccountEntity> findAllByUserId(@Param("userId") Long userId);
 
-    @Query("SELECT COUNT(a) > 0 FROM BankAccountEntity a WHERE a.userEntity.id = :userId AND a.id = :bankAccountId")
-    boolean existsById(@Param("userId") Long userId, @Param("bankAccountId") Long bankAccountId);
+    @Query("SELECT a.userEntity.id FROM BankAccountEntity a WHERE a.id = :bankAccountId")
+    Long findUserId(@Param("bankAccountId") Long bankAccountId);
+
 }
