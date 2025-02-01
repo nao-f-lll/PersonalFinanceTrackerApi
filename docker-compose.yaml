@@ -14,8 +14,13 @@ services:
       SPRING_MVC_CONVERTERS_PREFERRED_JSON_MAPPER: jackson
       SPRING_MVC_CONTENTNEGOTIATION_FAVOR_PARAMETER: false
       SPRING_MVC_CONTENTNEGOTIATION_MEDIA_TYPES_JSON: application/json
+      SPRING_CACHE_TYPE: reds
+      SPRING_DATA_REDIS_HOST: ${REDIS_URL}
+      SPRING_DATA_REDIS_PORT: 6379
+      SPRING_DATA_REDIS_DATABASE: ${REDIS_DB}
     depends_on:
       - db
+      - cache
 
   db:
     image: postgres:17
@@ -29,6 +34,15 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
 
+  cache:
+    image: redis:latest
+    container_name: cache_db
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+
 volumes:
   postgres-data:
     driver: local
+  redis-data:
