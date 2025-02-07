@@ -11,6 +11,7 @@ import com.personalfinancetracker.repositories.FinancialGoalRepository;
 import com.personalfinancetracker.service.BankAccountService;
 import com.personalfinancetracker.service.FinancialGoalService;
 import com.personalfinancetracker.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.event.EventListener;
@@ -31,7 +32,7 @@ public class FinancialGoalServiceImpl implements FinancialGoalService {
     private final Mapper<FinancialGoalEntity, FinancialGoalDto> financialGoalMapper;
     private final String CACHE_TABLE_NAME = "userFinancialGoals";
 
-
+    @Autowired
     public FinancialGoalServiceImpl(FinancialGoalRepository financialGoalRepository, UserService userService, Mapper<UserEntity, UserDto> userMapper, BankAccountService bankAccountService, Mapper<FinancialGoalEntity, FinancialGoalDto> financialGoalMapper) {
         this.financialGoalRepository = financialGoalRepository;
         this.userService = userService;

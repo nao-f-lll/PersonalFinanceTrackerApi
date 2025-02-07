@@ -77,8 +77,10 @@ public class BankAccountServiceImpl implements BankAccountService {
             Optional.ofNullable(bankAccountEntity.getBalance()).ifPresent(existingAccount::setBalance);
             Optional.ofNullable(bankAccountEntity.getType()).ifPresent(existingAccount::setType);
             BankAccountEntity saveBAnkAccount = bankAccountRepository.save(existingAccount);
-            BankAccountCreateUpdatedEvent event = new BankAccountCreateUpdatedEvent(this, bankAccountEntity.getUserEntity().getId());
-            eventPublisher.publishEvent(event);
+            if (Optional.ofNullable(bankAccountEntity.getBalance()).isPresent()) {
+                BankAccountCreateUpdatedEvent event = new BankAccountCreateUpdatedEvent(this, bankAccountEntity.getUserEntity().getId());
+                eventPublisher.publishEvent(event);
+            }
             return saveBAnkAccount;
         }).orElseThrow(() -> new RuntimeException("Bank Account Does Not Exist"));
     }
