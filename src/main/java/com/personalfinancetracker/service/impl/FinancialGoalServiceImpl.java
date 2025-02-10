@@ -19,6 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Optional;
 
@@ -46,7 +47,7 @@ public class FinancialGoalServiceImpl implements FinancialGoalService {
     public FinancialGoalEntity create(FinancialGoalEntity financialGoalEntity) {
         Optional<UserEntity> userEntity = userService.findOne(financialGoalEntity.getUserEntity().getId());
         if (userEntity.isPresent()) {
-            Double totalBalanceOfUserBankAccounts = getTotalBalance(userEntity.get().getId());
+            BigDecimal totalBalanceOfUserBankAccounts = getTotalBalance(userEntity.get().getId());
             financialGoalEntity.setCurrentAmount(totalBalanceOfUserBankAccounts);
             financialGoalEntity.setUserEntity(userEntity.get());
             return financialGoalRepository.save(financialGoalEntity);
@@ -92,18 +93,18 @@ public class FinancialGoalServiceImpl implements FinancialGoalService {
     public void updateCurrentAmount(BankAccountCreateUpdatedEvent event) {
         Long userId = event.getUserID();
         ArrayList<FinancialGoalEntity> financialGoalEntities = financialGoalRepository.findAll(userId);
-        Double totalBalanceOfUserBankAccounts = getTotalBalance(userId);
+        BigDecimal totalBalanceOfUserBankAccounts = getTotalBalance(userId);
         for (FinancialGoalEntity financialGoalEntity : financialGoalEntities) {
             financialGoalEntity.setCurrentAmount(totalBalanceOfUserBankAccounts);
             financialGoalRepository.save(financialGoalEntity);
         }
     }
 
-    private Double getTotalBalance(Long userId) {
+    private BigDecimal getTotalBalance(Long userId) {
         ArrayList<BankAccountEntity> bankAccountEntities = bankAccountService.findAllByUserId(userId);
-        Double totalBalanceOfUserBankAccounts = 0.0;
+        BigDecimal totalBalanceOfUserBankAccounts = BigDecimal.ZERO;
         for (BankAccountEntity bankAccountEntity : bankAccountEntities) {
-            totalBalanceOfUserBankAccounts += bankAccountEntity.getBalance();
+            totalBalanceOfUserBankAccounts = totalBalanceOfUserBankAccounts.add(bankAccountEntity.getBalance());
         }
         return totalBalanceOfUserBankAccounts;
     }
