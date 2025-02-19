@@ -17,6 +17,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import static com.personalfinancetracker.utils.DataSanitizer.sanitize;
+
 @RestController
 public class FinancialGoalController {
 
@@ -30,11 +32,14 @@ public class FinancialGoalController {
         this.financialGoalService = financialGoalService;
     }
 
-
     @GetMapping(path = "/v1/financial-goals/{user-id}")
-    public Page<Object> getFinancialGoals(Pageable pageable, @PathVariable("user-id") Long userId) {
+    public Page<FinancialGoalDto> getFinancialGoals(Pageable pageable, @PathVariable("user-id") Long userId) {
         Page<FinancialGoalEntity> financialGoalEntities = financialGoalService.findAllByUserId(pageable, userId);
-        return financialGoalEntities.map(financialGoalMapper::mapTo);
+        Page<FinancialGoalDto> financialGoalDtos =  financialGoalEntities.map(financialGoalMapper::mapTo);
+        return financialGoalDtos.map(financialGoalDto -> {
+            financialGoalDto.setUserDto(sanitize(financialGoalDto.getUserDto()));
+            return financialGoalDto;
+        });
     }
 
     @PostMapping(path = "/v1/financial-goals")
@@ -44,6 +49,7 @@ public class FinancialGoalController {
             FinancialGoalEntity savedFinancialGoal = financialGoalService.create(financialGoalEntity);
             if (savedFinancialGoal != null) {
                 FinancialGoalDto response = financialGoalMapper.mapTo(savedFinancialGoal);
+                response.setUserDto(sanitize(response.getUserDto()));
                 return new ResponseEntity<>(response, HttpStatus.CREATED);
             } else {
                 return new ResponseEntity<>("The user does not exists",HttpStatus.NOT_FOUND);
@@ -63,6 +69,7 @@ public class FinancialGoalController {
             FinancialGoalEntity financialGoalEntity = financialGoalMapper.mapFrom(financialGoalDto);
             FinancialGoalEntity saveFinancialGoal = financialGoalService.partialUpdate(financialGoalEntity);
             FinancialGoalDto response = financialGoalMapper.mapTo(saveFinancialGoal);
+            response.setUserDto(sanitize(response.getUserDto()));
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);

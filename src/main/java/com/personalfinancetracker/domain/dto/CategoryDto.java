@@ -14,6 +14,8 @@ import lombok.NoArgsConstructor;
 @Builder
 public class CategoryDto {
 
+    private Long id;
+
     @NotNull(groups = {CreateGroup.class, PartialUpdateGroup.class})
     private String name;
 

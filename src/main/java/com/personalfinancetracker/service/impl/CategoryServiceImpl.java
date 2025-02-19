@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CategoryServiceImpl implements CategoryService {
@@ -47,5 +48,22 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public Page<CategoryEntity> findAll(Pageable pageable) {
         return categoryRepository.findAll(pageable);
+    }
+
+    @Cacheable(value = CACHE_TABLE_NAME)
+    @Override
+    public Page<CategoryEntity> findParentCategories(Pageable pageable) {
+        return categoryRepository.findByParentCategoryIsNull(pageable);
+    }
+
+    @Cacheable(value = CACHE_TABLE_NAME)
+    @Override
+    public Page<CategoryEntity> findSubCategoriesByParentId(Pageable pageable, Long parentId) {
+        return categoryRepository.findSubCategoriesByParentCategoryId(pageable, parentId);
+    }
+
+    @Override
+    public Optional<CategoryEntity> findOne(Long categoryId) {
+        return categoryRepository.findById(categoryId);
     }
 }

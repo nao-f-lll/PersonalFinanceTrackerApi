@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -36,15 +37,11 @@ public class UserEntity implements Serializable {
     @OneToMany(mappedBy = "userEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BankAccountEntity> bankAccounts = new ArrayList<>();
 
-    @Column(nullable = true)
     @OneToMany(mappedBy = "userEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FinancialGoalEntity> financialGoals = new ArrayList<>();
 
     @Column(nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date creation_date;
+    private LocalDateTime creation_date;
 
-    @Column(nullable = true)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date update_date;
+    private LocalDateTime update_date;
 }

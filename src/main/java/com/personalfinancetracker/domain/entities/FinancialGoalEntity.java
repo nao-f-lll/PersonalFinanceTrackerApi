@@ -6,7 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.io.Serializable;
-import java.sql.Date;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
@@ -28,11 +29,11 @@ public class FinancialGoalEntity implements Serializable {
     private String name;
 
     @Column(nullable = false)
-    private Double targetAmount;
+    private BigDecimal targetAmount;
 
     @Column(nullable = false)
-    private Double currentAmount;
+    private BigDecimal currentAmount;
 
     @Column(nullable = false)
-    private Date expectedDate;
+    private LocalDate expectedDate;
 }
