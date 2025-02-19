@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
+import static com.personalfinancetracker.utils.DataSanitizer.sanitize;
+
 @RestController
 public class UserController {
 
@@ -35,12 +37,8 @@ public class UserController {
     public ResponseEntity<UserDto> getUser(@PathVariable("id") Long id) {
         Optional<UserEntity> foundUser = userService.findOne(id);
         return foundUser.map(userEntity -> {
-            userEntity.setId(null);
-            userEntity.setPassword(null);
-            userEntity.setCreation_date(null);
-            userEntity.setUpdate_date(null);
             UserDto response = userMapper.mapTo(userEntity);
-            return new ResponseEntity<>(response, HttpStatus.OK);
+            return new ResponseEntity<>(sanitize(response), HttpStatus.OK);
         }).orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
@@ -52,7 +50,7 @@ public class UserController {
             UserEntity userEntity = userMapper.mapFrom(userDto);
             UserEntity savedUser = userService.create(userEntity);
             UserDto response = userMapper.mapTo(savedUser);
-            return new ResponseEntity<>(response, HttpStatus.CREATED);
+            return new ResponseEntity<>(sanitize(response), HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
@@ -69,7 +67,7 @@ public class UserController {
             UserEntity userEntity = userMapper.mapFrom(userDto);
             UserEntity savedUser = userService.fullUpdate(userEntity);
             UserDto response = userMapper.mapTo(savedUser);
-            return new ResponseEntity<>(response, HttpStatus.OK);
+            return new ResponseEntity<>(sanitize(response), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
@@ -86,7 +84,7 @@ public class UserController {
             UserEntity userEntity = userMapper.mapFrom(userDto);
             UserEntity savedUser = userService.partialUpdate(userEntity);
             UserDto response = userMapper.mapTo(savedUser);
-            return new ResponseEntity<>(response, HttpStatus.OK);
+            return new ResponseEntity<>(sanitize(response), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }

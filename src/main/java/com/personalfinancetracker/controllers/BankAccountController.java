@@ -18,6 +18,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 
+import static com.personalfinancetracker.utils.DataSanitizer.sanitize;
+
 @RestController
 public class BankAccountController {
 
@@ -35,7 +37,11 @@ public class BankAccountController {
     @GetMapping(path = "/v1/bank-accounts/{user-id}")
     public Page<BankAccountDto> getBankAccounts(Pageable pageable, @PathVariable("user-id") Long userId) {
         Page<BankAccountEntity> bankAccountEntities = bankAccountService.findAllByUserId(pageable, userId);
-        return bankAccountEntities.map(bankAccountMapper::mapTo);
+        Page<BankAccountDto> bankAccountDtos = bankAccountEntities.map(bankAccountMapper::mapTo);
+        return bankAccountDtos.map(bankAccountDto -> {
+            bankAccountDto.setUserDto(sanitize(bankAccountDto.getUserDto()));
+            return bankAccountDto;
+        });
     }
 
     @PostMapping(path = "/v1/bank-accounts")
@@ -45,6 +51,7 @@ public class BankAccountController {
             BankAccountEntity saveBankAccount = bankAccountService.create(bankAccountEntity);
             if (saveBankAccount != null) {
                 BankAccountDto response = bankAccountMapper.mapTo(saveBankAccount);
+                response.setUserDto(sanitize(response.getUserDto()));
                 return new ResponseEntity<>(response, HttpStatus.CREATED);
             } else {
                 return new ResponseEntity<>("The user does not exists",HttpStatus.NOT_FOUND);
@@ -64,6 +71,7 @@ public class BankAccountController {
             BankAccountEntity bankAccountEntity = bankAccountMapper.mapFrom(bankAccountDto);
             BankAccountEntity saveBankAccount = bankAccountService.partialUpdate(bankAccountEntity);
             BankAccountDto response = bankAccountMapper.mapTo(saveBankAccount);
+            response.setUserDto(sanitize(response.getUserDto()));
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
