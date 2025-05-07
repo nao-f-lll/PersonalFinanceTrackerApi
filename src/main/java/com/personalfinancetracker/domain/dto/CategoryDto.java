@@ -24,6 +24,9 @@ public class CategoryDto {
 
     private String description;
 
+//    @NotNull(message = "user id cannot be null", groups = CreateGroup.class)
+//    private UserDto userDto;
+
     @NotNull(message = "Category type cannot be null", groups = {CreateGroup.class, PartialUpdateGroup.class})
     private String type;
 }
