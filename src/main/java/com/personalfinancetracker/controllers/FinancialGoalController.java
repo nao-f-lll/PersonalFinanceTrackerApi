@@ -31,7 +31,7 @@ public class FinancialGoalController {
         this.financialGoalMapper = financialGoalMapper;
         this.financialGoalService = financialGoalService;
     }
-
+    //TODO get financial-goals by it's id not the user id
     @GetMapping(path = "/v1/financial-goals/{user-id}")
     public Page<FinancialGoalDto> getFinancialGoals(Pageable pageable, @PathVariable("user-id") Long userId) {
         Page<FinancialGoalEntity> financialGoalEntities = financialGoalService.findAllByUserId(pageable, userId);

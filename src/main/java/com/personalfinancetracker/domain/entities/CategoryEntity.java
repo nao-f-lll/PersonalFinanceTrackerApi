@@ -41,6 +41,10 @@ public class CategoryEntity implements Serializable {
 
     private String description;
 
+//    @ManyToOne()
+//    @JoinColumn(name = "users_id", nullable = false)
+//    private UserEntity userEntity;
+
     @Column(nullable = false)
     private String type;
 }

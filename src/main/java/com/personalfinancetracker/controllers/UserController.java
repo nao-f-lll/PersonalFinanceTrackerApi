@@ -8,6 +8,9 @@ import com.personalfinancetracker.domain.entities.UserEntity;
 import com.personalfinancetracker.exceptions.ErrorResponse;
 import com.personalfinancetracker.mapper.Mapper;
 import com.personalfinancetracker.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +24,7 @@ import java.util.Optional;
 import static com.personalfinancetracker.utils.DataSanitizer.sanitize;
 
 @RestController
+@Tag(name = "User")
 public class UserController {
 
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
@@ -33,6 +37,19 @@ public class UserController {
         this.userService = userService;
     }
 
+    @Operation(
+          description = "Get endpoint for a specific user (e.g the user that has the given id)",
+            responses = {
+                  @ApiResponse(
+                          description = "OK",
+                          responseCode = "200"
+                  ),
+                    @ApiResponse(
+                            description = "NOT FOUND",
+                            responseCode = "404"
+                    )
+            }
+    )
     @GetMapping(path = "/v1/users/{id}")
     public ResponseEntity<UserDto> getUser(@PathVariable("id") Long id) {
         Optional<UserEntity> foundUser = userService.findOne(id);

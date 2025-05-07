@@ -33,7 +33,7 @@ public class BankAccountController {
         this.bankAccountMapper = bankAccountMapper;
         this.bankAccountService = bankAccountService;
     }
-
+    //TODO get bank account by it's id not the user id
     @GetMapping(path = "/v1/bank-accounts/{user-id}")
     public Page<BankAccountDto> getBankAccounts(Pageable pageable, @PathVariable("user-id") Long userId) {
         Page<BankAccountEntity> bankAccountEntities = bankAccountService.findAllByUserId(pageable, userId);

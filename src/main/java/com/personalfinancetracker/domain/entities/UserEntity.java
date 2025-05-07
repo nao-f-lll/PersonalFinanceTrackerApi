@@ -40,6 +40,13 @@ public class UserEntity implements Serializable {
     @OneToMany(mappedBy = "userEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FinancialGoalEntity> financialGoals = new ArrayList<>();
 
+//    @OneToMany(mappedBy = "userEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private List<TransactionEntity> transactions = new ArrayList<>();
+
+    // TODO
+//    @OneToMany(mappedBy = "userEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private List<CategoryEntity> categories = new ArrayList<>();
+
     @Column(nullable = false)
     private LocalDateTime creation_date;
 

@@ -5,6 +5,7 @@ import com.personalfinancetracker.domain.dto.UserDto;
 import com.personalfinancetracker.domain.entities.BankAccountEntity;
 import com.personalfinancetracker.domain.entities.UserEntity;
 import com.personalfinancetracker.event.BankAccountCreateUpdatedEvent;
+import com.personalfinancetracker.event.TransactionCreateUpdateEvent;
 import com.personalfinancetracker.mapper.Mapper;
 import com.personalfinancetracker.repositories.BankAccountRepository;
 import com.personalfinancetracker.service.BankAccountService;
@@ -12,10 +13,12 @@ import com.personalfinancetracker.service.UserService;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Optional;
 
@@ -117,5 +120,22 @@ public class BankAccountServiceImpl implements BankAccountService {
     public Optional<BankAccountEntity> findOne(Long bankAccountId) {
         return bankAccountRepository.findById(bankAccountId);
     }
-}
 
+    @CacheEvict(value = CACHE_TABLE_NAME, allEntries = true)
+    @EventListener
+    public void updateBalance(TransactionCreateUpdateEvent event) {
+        Optional<BankAccountEntity> bankAccountEntity = bankAccountRepository.findById(event.getBankAccountId());
+        if (bankAccountEntity.isPresent()) {
+            BigDecimal newBalance;
+            if (event.getIsAddition()) {
+                 newBalance = bankAccountEntity.get().getBalance().add(event.getAmount());
+            } else {
+                 newBalance = bankAccountEntity.get().getBalance().subtract(event.getAmount());
+            }
+            bankAccountEntity.get().setBalance(newBalance);
+            bankAccountRepository.save(bankAccountEntity.get());
+            BankAccountCreateUpdatedEvent changeCurrentAmountEvent = new BankAccountCreateUpdatedEvent(this, bankAccountEntity.get().getUserEntity().getId());
+            eventPublisher.publishEvent(changeCurrentAmountEvent);
+        }
+    }
+}
