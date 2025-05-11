@@ -33,8 +33,26 @@ public class BankAccountController {
         this.bankAccountMapper = bankAccountMapper;
         this.bankAccountService = bankAccountService;
     }
-    //TODO get bank account by it's id not the user id
-    @GetMapping(path = "/v1/bank-accounts/{user-id}")
+
+    @GetMapping(path = "/v1/bank-accounts/{bank-account-id}")
+    public ResponseEntity<Object> getBankAccount( @PathVariable("bank-account-id") Long bankAccountId) {
+
+        Optional<BankAccountEntity> saveBankAccount = bankAccountService.findOne(bankAccountId);
+        if (saveBankAccount.isPresent()) {
+            BankAccountDto response = bankAccountMapper.mapTo(saveBankAccount.get());
+            response.setUserDto(sanitize(response.getUserDto()));
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+        else {
+            ErrorResponse errorResponse = ErrorResponse
+                    .builder()
+                    .message("Bank Account Does Not Exists")
+                    .build();
+            return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @GetMapping(path = "/v1/bank-accounts/user/{user-id}")
     public Page<BankAccountDto> getBankAccounts(Pageable pageable, @PathVariable("user-id") Long userId) {
         Page<BankAccountEntity> bankAccountEntities = bankAccountService.findAllByUserId(pageable, userId);
         Page<BankAccountDto> bankAccountDtos = bankAccountEntities.map(bankAccountMapper::mapTo);

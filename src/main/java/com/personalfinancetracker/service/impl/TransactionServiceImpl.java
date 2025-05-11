@@ -100,10 +100,10 @@ public class TransactionServiceImpl implements TransactionService {
 //    }
 //
 //
-//    @Override
-//    public Page<TransactionEntity> findAll(Long userId, Pageable pageable) {
-//        return transactionRepository.findAllByUserId(userId, pageable);
-//    }
+    @Override
+    public Page<TransactionEntity> findAll(Long userId, Pageable pageable) {
+        return transactionRepository.findAllByUserId(userId, pageable);
+    }
 //
     @Override
     public boolean isExists(Long transactionId) {

@@ -31,17 +31,16 @@ public class TransactionController {
         this.transactionService = transactionService;
     }
 
-//    @GetMapping("/v1/transactions/{user-id}")
-//    public Page<TransactionDto> getTransactions(@PathVariable("user-id") Long userId, Pageable pageable) {
-//        Page<TransactionEntity> transactionEntities = transactionService.findAll(userId ,pageable);
-//        Page<TransactionDto> transactionDtos = transactionEntities.map(transactionMapper::mapTo);
-//
-//        return transactionDtos.map(transactionDto -> {
-//            transactionDto.setUserDto(sanitize(transactionDto.getUserDto()));
-//            transactionDto.setBankAccountDto(sanitize(transactionDto.getBankAccountDto()));
-//            return transactionDto;
-//        });
-//    }
+    @GetMapping("/v1/transactions/user/{user-id}")
+    public Page<TransactionDto> getTransactions(@PathVariable("user-id") Long userId, Pageable pageable) {
+        Page<TransactionEntity> transactionEntities = transactionService.findAll(userId ,pageable);
+        Page<TransactionDto> transactionDtos = transactionEntities.map(transactionMapper::mapTo);
+        return transactionDtos.map(transactionDto -> {
+            transactionDto.setUserDto(sanitize(transactionDto.getUserDto()));
+            transactionDto.setBankAccountDto(sanitize(transactionDto.getBankAccountDto()));
+            return transactionDto;
+        });
+    }
 
     @PostMapping(path = "/v1/transactions")
     public ResponseEntity<Object> createTransaction(@Validated({CreateGroup.class}) @RequestBody TransactionDto transactionDto) {
@@ -69,14 +68,14 @@ public class TransactionController {
         }
     }
 
-//    @DeleteMapping(path = "/v1/users/{user-id}/bank-accounts/{bank-account-id}/transactions/{transaction-id}")
-//    public ResponseEntity<TransactionDto> deleteTransaction(@PathVariable("transaction-id") Long transactionId) {
-//        if (transactionService.isExists(transactionId)) {
-//            transactionService.delete(transactionId);
-//            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-//        }
-//        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//    }
+    @DeleteMapping(path = "/v1/transactions/{transaction-id}")
+    public ResponseEntity<TransactionDto> deleteTransaction(@PathVariable("transaction-id") Long transactionId) {
+        if (transactionService.isExists(transactionId)) {
+            transactionService.delete(transactionId);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
 
 //
 //    @PatchMapping(path = "/v1/transactions/{transaction-id}")
@@ -97,5 +96,5 @@ public class TransactionController {
 //                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 //            }
 //        }
-//    }
-}
+//     }
+    }

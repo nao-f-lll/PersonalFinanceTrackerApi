@@ -13,6 +13,8 @@ public interface TransactionService {
 
 //    Page<TransactionEntity> findAll(Long userId, Pageable pageable);
 //
+    Page<TransactionEntity> findAll(Long userId, Pageable pageable);
+
     boolean isExists(Long transactionId);
 
     void delete(Long transactionId);
